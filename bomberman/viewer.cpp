@@ -65,26 +65,34 @@ class ControllerPersonagem{
 
 	public:
 		int posicao[2];
-		void move(ModelMapp &M, ModelPersonagem &P);
+		void move(ModelMapp &M, ModelPersonagem &P, int x, int y);
 };
 
-void ControllerPersonagem::move(ModelMapp &M, ModelPersonagem &P){
+void ControllerPersonagem::move(ModelMapp &M, ModelPersonagem &P, int x, int y){
 	
-	int x=0,y=0;
-	std::cin>> x;
-	std::cin>> y;
+	//int x=0,y=0;
+	//std::cin>> x;
+	//std::cin>> y;
 	//Preciso descobrir como ler as direções do teclado
-	if(x>15)
-                x = 15;
-        if(y>15)
-        	y = 15;        
 	
 	
-	M.terreno[x][y] = 0; // No futuro podemos diferenciar posicoes ocupadas de posicoes proibidas
-	M.terreno[P.posicao[0]][P.posicao[1]] = 1;
+	M.terreno[P.posicao[0]][P.posicao[1]] = 1; //Desocupa posicao antiga
 	
-	P.posicao[0] = x;
-	P.posicao[1] = y;
+	P.posicao[0] = P.posicao[0] +x;
+	P.posicao[1] = P.posicao[1] +y;
+	
+	if(P.posicao[0] >MAX_I -1)
+                P.posicao[0]  = MAX_I -1;
+        else if(P.posicao[0] < 0)
+        	P.posicao[0] = 0;
+        	
+        if(P.posicao[1]>MAX_J -1)
+        	P.posicao[1] = MAX_J -1;        
+	else if(P.posicao[1]<0)
+		P.posicao[1] =0;
+	
+	M.terreno[P.posicao[0]][P.posicao[1]] = 0; // Ocupa a nova posicao
+	
 }
 
 class ViewerPersonagem{
@@ -174,10 +182,21 @@ int main() {
     */
 
     
-    if (state[SDL_SCANCODE_LEFT]) target.x = (P1.posicao[0]-1)*SECOES_X;
-    if (state[SDL_SCANCODE_RIGHT]) target.x = (P1.posicao[0]+1)*SECOES_X;
-    if (state[SDL_SCANCODE_UP]) target.y = (P1.posicao[0]+1)*SECOES_Y;
-    if (state[SDL_SCANCODE_DOWN]) target.y = (P1.posicao[0]-1)*SECOES_Y;;
+    if (state[SDL_SCANCODE_LEFT]){
+    	C1.move(M,P1,-1,0)                     // altera mapa e posicao
+    	target.x = (P1.posicao[0])*SECOES_X;  // atualiza viewer com a nova posicao
+    	}
+    if (state[SDL_SCANCODE_RIGHT])
+     	C1.move(M,P1,1,0) 
+     	target.x = (P1.posicao[0]+1)*SECOES_X;
+     	}
+    if (state[SDL_SCANCODE_UP]) 
+    	C1.move(M,P1,0,1) 
+    	target.y = (P1.posicao[0]+1)*SECOES_Y;
+    	}
+    if (state[SDL_SCANCODE_DOWN])
+    	C1.move(M,P1,0,-1)  
+    	target.y = (P1.posicao[0]-1)*SECOES_Y;;
 
     while (SDL_PollEvent(&evento)) {
       if (evento.type == SDL_QUIT) {
