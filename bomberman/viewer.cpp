@@ -10,7 +10,7 @@ const int MAX_I = 16;
 const int MAX_J = 16;
 
 const int SECOES_X = SCREEN_WIDTH/MAX_I;
-const int SECOES_y = SCREEN_WIDTH/MAX_J;
+const int SECOES_Y = SCREEN_HEIGHT/MAX_J;
 
 class ModelMapp{
 	private:
@@ -70,10 +70,6 @@ class ControllerPersonagem{
 
 void ControllerPersonagem::move(ModelMapp &M, ModelPersonagem &P, int x, int y){
 	
-	//int x=0,y=0;
-	//std::cin>> x;
-	//std::cin>> y;
-	//Preciso descobrir como ler as direções do teclado
 	
 	
 	M.terreno[P.posicao[0]][P.posicao[1]] = 1; //Desocupa posicao antiga
@@ -96,13 +92,14 @@ void ControllerPersonagem::move(ModelMapp &M, ModelPersonagem &P, int x, int y){
 }
 
 class ViewerPersonagem{
-  private:
+  		private:
 
-  public:
-    ViewerPersonagem(ModelPersonagem &P);
+  		public:
+    			ViewerPersonagem(ModelMapp &M, ModelPersonagem &P, Controller &C);
+    			void destroyer(ViewerPersonagem &V);
 }
 
-ViewerPersonagem::ViewerPersonagem(ModelPersonagem &P){
+ViewerPersonagem::ViewerPersonagem(ModelMapp &M, ModelPersonagem &P, Controller &C){
   // Inicializando o subsistema de video do SDL
 
   if ( SDL_Init (SDL_INIT_VIDEO) < 0 ) {
@@ -141,9 +138,9 @@ ViewerPersonagem::ViewerPersonagem(ModelPersonagem &P){
 
   // Carregando texturas
   // personagem
-  SDL_Texture *personagem = IMG_LoadTexture(renderer, "./images/bomberman.png");
+  SDL_Texture *personagem = IMG_LoadTexture(renderer, "~/Documentos/EA872/Tarefas_EA872/bomberman/bomberman.png");
   // fundo
-  SDL_Texture *tabuleiro = IMG_LoadTexture(renderer, "./images/tabuleiro.png");
+  SDL_Texture *tabuleiro = IMG_LoadTexture(renderer, "~/Documentos/EA872/Tarefas_EA872/bomberman/tabuleiro.png");
 
 
   // Quadrado onde a textura sera desenhada
@@ -159,18 +156,6 @@ ViewerPersonagem::ViewerPersonagem(ModelPersonagem &P){
   SDL_Event evento; // eventos discretos
   const Uint8* state = SDL_GetKeyboardState(nullptr); // estado do teclado
 
-}
-
-int main() {
-
-	ModelMapp M;
-	ModelPersonagem P1;
-	ControllerPersonagem C1;
-	M.mapp_terrain();
-	
-	P1.set_personagem(M);
-
-  // Laco principal do jogo
   while(rodando) {
     // Polling de eventos
     SDL_PumpEvents(); // atualiza estado do teclado
@@ -183,19 +168,98 @@ int main() {
 
     
     if (state[SDL_SCANCODE_LEFT]){
-    	C1.move(M,P1,-1,0)                     // altera mapa e posicao
+    	C.move(M,P,-1,0);                     // altera mapa e posicao
+    	target.x = (P1.posicao[0])*SECOES_X;  // atualiza viewer com a nova posicao
+    	}
+    if (state[SDL_SCANCODE_RIGHT]){
+     	C.move(M,P,1,0); 
+     	target.x = (P1.posicao[0]+1)*SECOES_X;
+     	}
+    if (state[SDL_SCANCODE_UP]){ 
+    	C.move(M,P,0,1); 
+    	target.y = (P1.posicao[0]+1)*SECOES_Y;
+    	}
+    if (state[SDL_SCANCODE_DOWN]){
+    	C.move(M,P,0,-1);  
+    	target.y = (P1.posicao[0]-1)*SECOES_Y;;
+	}
+    while (SDL_PollEvent(&evento)) {
+      if (evento.type == SDL_QUIT) {
+        rodando = false;
+		      }
+      // Exemplos de outros eventos.
+      // Que outros eventos poderiamos ter e que sao uteis?
+      //if (evento.type == SDL_KEYDOWN) {
+      //}
+      //if (evento.type == SDL_MOUSEBUTTONDOWN) {
+      //}
+		    }
+
+    // Desenhar a cena
+    SDL_RenderClear(renderer);
+    SDL_RenderCopy(renderer, tabuleiro, nullptr, nullptr);
+    SDL_RenderCopy(renderer, personagem, nullptr, &target);
+    SDL_RenderPresent(renderer);
+
+    // Delay para diminuir o framerate
+    SDL_Delay(10);
+  	}
+
+}
+
+
+
+
+void ViewerPersonagem::destroyer(ViewerPersonagem &V){
+  SDL_DestroyTexture(personagem);
+  SDL_DestroyRenderer(renderer);
+  SDL_DestroyWindow(window);
+  SDL_Quit();	
+  
+}
+
+int main() {
+
+	ModelMapp M;
+	ModelPersonagem P1;
+	ControllerPersonagem C1;
+	M.mapp_terrain();
+	
+	P1.set_personagem(M);
+	
+	
+	ViewerPersonagem V1;
+	bool rodando = true;
+
+  // Laco principal do jogo
+  while(rodando) {
+  
+  
+  
+    // Polling de eventos
+   // SDL_PumpEvents(); // atualiza estado do teclado
+      
+    /* Capivara.cpp
+    target.x = 50*C.solve(M,t,T,delta,m,b,k,x_new,x_old,vx);
+    printf("targetX: %d\n", target.x);
+    t = t+delta;
+    */
+
+    /*
+    if (state[SDL_SCANCODE_LEFT]){
+    	C1.move(M,P1,-1,0);                     // altera mapa e posicao
     	target.x = (P1.posicao[0])*SECOES_X;  // atualiza viewer com a nova posicao
     	}
     if (state[SDL_SCANCODE_RIGHT])
-     	C1.move(M,P1,1,0) 
+     	C1.move(M,P1,1,0); 
      	target.x = (P1.posicao[0]+1)*SECOES_X;
      	}
     if (state[SDL_SCANCODE_UP]) 
-    	C1.move(M,P1,0,1) 
+    	C1.move(M,P1,0,1); 
     	target.y = (P1.posicao[0]+1)*SECOES_Y;
     	}
     if (state[SDL_SCANCODE_DOWN])
-    	C1.move(M,P1,0,-1)  
+    	C1.move(M,P1,0,-1);  
     	target.y = (P1.posicao[0]-1)*SECOES_Y;;
 
     while (SDL_PollEvent(&evento)) {
@@ -223,7 +287,7 @@ int main() {
   SDL_DestroyTexture(personagem);
   SDL_DestroyRenderer(renderer);
   SDL_DestroyWindow(window);
-  SDL_Quit();
-
+  SDL_Quit();*/
+	
   return 0;
 }
