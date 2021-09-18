@@ -95,16 +95,16 @@ class ViewerPersonagem{
   		private:
 
   		public:
-    			ViewerPersonagem(ModelMapp &M, ModelPersonagem &P, Controller &C);
-    			void destroyer(ViewerPersonagem &V);
-}
+    			ViewerPersonagem(ModelMapp &M, ModelPersonagem &P, ControllerPersonagem &C, bool rodando);
+    			//void destroyer(ViewerPersonagem &V);
+};
 
-ViewerPersonagem::ViewerPersonagem(ModelMapp &M, ModelPersonagem &P, Controller &C){
+ViewerPersonagem::ViewerPersonagem(ModelMapp &M, ModelPersonagem &P, ControllerPersonagem &C, bool rodando){
   // Inicializando o subsistema de video do SDL
 
   if ( SDL_Init (SDL_INIT_VIDEO) < 0 ) {
     std::cout << SDL_GetError();
-    return 1;
+    SDL_Quit();
   }
 
   // Criando uma janela
@@ -121,7 +121,6 @@ ViewerPersonagem::ViewerPersonagem(ModelMapp &M, ModelPersonagem &P, Controller 
   if (window == nullptr) {
     std::cout << SDL_GetError();
     SDL_Quit();
-    return 1;
   }
 
   // Inicializando o renderizador
@@ -133,7 +132,6 @@ ViewerPersonagem::ViewerPersonagem(ModelMapp &M, ModelPersonagem &P, Controller 
     SDL_DestroyWindow(window);
     std::cout << SDL_GetError();
     SDL_Quit();
-    return 1;
   }
 
   // Carregando texturas
@@ -150,7 +148,7 @@ ViewerPersonagem::ViewerPersonagem(ModelMapp &M, ModelPersonagem &P, Controller 
   SDL_QueryTexture(personagem, nullptr, nullptr, &target.w, &target.h);
 
   // Controlador:
-  bool rodando = true;
+  //bool rodando = true;
 
   // Variaveis para verificar eventos
   SDL_Event evento; // eventos discretos
@@ -169,19 +167,19 @@ ViewerPersonagem::ViewerPersonagem(ModelMapp &M, ModelPersonagem &P, Controller 
     
     if (state[SDL_SCANCODE_LEFT]){
     	C.move(M,P,-1,0);                     // altera mapa e posicao
-    	target.x = (P1.posicao[0])*SECOES_X;  // atualiza viewer com a nova posicao
+    	target.x = (P.posicao[0])*SECOES_X;  // atualiza viewer com a nova posicao
     	}
     if (state[SDL_SCANCODE_RIGHT]){
      	C.move(M,P,1,0); 
-     	target.x = (P1.posicao[0]+1)*SECOES_X;
+     	target.x = (P.posicao[0]+1)*SECOES_X;
      	}
     if (state[SDL_SCANCODE_UP]){ 
     	C.move(M,P,0,1); 
-    	target.y = (P1.posicao[0]+1)*SECOES_Y;
+    	target.y = (P.posicao[0]+1)*SECOES_Y;
     	}
     if (state[SDL_SCANCODE_DOWN]){
     	C.move(M,P,0,-1);  
-    	target.y = (P1.posicao[0]-1)*SECOES_Y;;
+    	target.y = (P.posicao[0]-1)*SECOES_Y;;
 	}
     while (SDL_PollEvent(&evento)) {
       if (evento.type == SDL_QUIT) {
@@ -205,12 +203,7 @@ ViewerPersonagem::ViewerPersonagem(ModelMapp &M, ModelPersonagem &P, Controller 
     SDL_Delay(10);
   	}
 
-}
-
-
-
-
-void ViewerPersonagem::destroyer(ViewerPersonagem &V){
+//void ViewerPersonagem::destroyer(ViewerPersonagem &V){
   SDL_DestroyTexture(personagem);
   SDL_DestroyRenderer(renderer);
   SDL_DestroyWindow(window);
@@ -226,68 +219,13 @@ int main() {
 	M.mapp_terrain();
 	
 	P1.set_personagem(M);
-	
-	
-	ViewerPersonagem V1;
 	bool rodando = true;
-
-  // Laco principal do jogo
-  while(rodando) {
-  
-  
-  
-    // Polling de eventos
-   // SDL_PumpEvents(); // atualiza estado do teclado
-      
-    /* Capivara.cpp
-    target.x = 50*C.solve(M,t,T,delta,m,b,k,x_new,x_old,vx);
-    printf("targetX: %d\n", target.x);
-    t = t+delta;
-    */
-
-    /*
-    if (state[SDL_SCANCODE_LEFT]){
-    	C1.move(M,P1,-1,0);                     // altera mapa e posicao
-    	target.x = (P1.posicao[0])*SECOES_X;  // atualiza viewer com a nova posicao
-    	}
-    if (state[SDL_SCANCODE_RIGHT])
-     	C1.move(M,P1,1,0); 
-     	target.x = (P1.posicao[0]+1)*SECOES_X;
-     	}
-    if (state[SDL_SCANCODE_UP]) 
-    	C1.move(M,P1,0,1); 
-    	target.y = (P1.posicao[0]+1)*SECOES_Y;
-    	}
-    if (state[SDL_SCANCODE_DOWN])
-    	C1.move(M,P1,0,-1);  
-    	target.y = (P1.posicao[0]-1)*SECOES_Y;;
-
-    while (SDL_PollEvent(&evento)) {
-      if (evento.type == SDL_QUIT) {
-        rodando = false;
-      }
-      // Exemplos de outros eventos.
-      // Que outros eventos poderiamos ter e que sao uteis?
-      //if (evento.type == SDL_KEYDOWN) {
-      //}
-      //if (evento.type == SDL_MOUSEBUTTONDOWN) {
-      //}
-    }
-
-    // Desenhar a cena
-    SDL_RenderClear(renderer);
-    SDL_RenderCopy(renderer, tabuleiro, nullptr, nullptr);
-    SDL_RenderCopy(renderer, personagem, nullptr, &target);
-    SDL_RenderPresent(renderer);
-
-    // Delay para diminuir o framerate
-    SDL_Delay(10);
-  }
-
-  SDL_DestroyTexture(personagem);
-  SDL_DestroyRenderer(renderer);
-  SDL_DestroyWindow(window);
-  SDL_Quit();*/
 	
+	ViewerPersonagem V1(M,P1,C1,rodando);
+	
+
+  
+  
+   
   return 0;
 }
