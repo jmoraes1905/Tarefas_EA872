@@ -9,6 +9,7 @@ class ModelMapp{
 	public:
 		int terreno[16][16];
 		void mapp_terrain();
+		void forbbid_terrain();
 };
 
 
@@ -22,6 +23,20 @@ void ModelMapp::mapp_terrain(){
 	}
 
 }
+
+void ModelMapp::forbbid_terrain(){
+
+	int k;
+	for(k=0;k<16;k++){
+		terreno[0][k] = -1;
+		terreno[15][k] = -1;
+		terreno[k][0] = -1;
+		terreno[k][15] = -1;
+		}
+		
+			
+}
+
 class ModelPersonagem{
 	private:
 
@@ -67,12 +82,13 @@ void ControllerPersonagem::move(ModelMapp &M, ModelPersonagem &P){
         if(y>15)
         	y = 15;        
 	
+	if(M.terreno[x][y] == 1){	
+		M.terreno[x][y] = 0; // No futuro podemos diferenciar posicoes ocupadas de posicoes proibidas
+		M.terreno[P.posicao[0]][P.posicao[1]] = 1;
 	
-	M.terreno[x][y] = 0; // No futuro podemos diferenciar posicoes ocupadas de posicoes proibidas
-	M.terreno[P.posicao[0]][P.posicao[1]] = 1;
-	
-	P.posicao[0] = x;
-	P.posicao[1] = y;
+		P.posicao[0] = x;
+		P.posicao[1] = y;
+		}
 }
        	
 
@@ -81,6 +97,7 @@ int main(){
 	ModelPersonagem P1;
 	ControllerPersonagem C1;
 	M.mapp_terrain();
+	M.forbbid_terrain();
 	
 	int i,j;
 	

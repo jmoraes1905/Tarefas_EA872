@@ -4,8 +4,8 @@
 #include <memory>
 //#include "func.h"
 
-const int SCREEN_WIDTH = 760;
-const int SCREEN_HEIGHT = 760;
+const int SCREEN_WIDTH = 512;
+const int SCREEN_HEIGHT = 512;
 const int MAX_I = 16;
 const int MAX_J = 16;
 
@@ -19,6 +19,7 @@ class ModelMapp{
 	public:
 		int terreno[16][16];
 		void mapp_terrain();
+		void forbbid_terrain();
 };
 
 
@@ -33,31 +34,42 @@ void ModelMapp::mapp_terrain(){
 
 }
 
+void ModelMapp::forbbid_terrain(){
+
+	int k;
+	for(k=0;k<16;k++){
+		terreno[0][k] = -1;
+		terreno[15][k] = -1;
+		terreno[k][0] = -1;
+		terreno[k][15] = -1;
+		}
+		
+			
+
+}
+
 class ModelPersonagem{
 	private:
 
 	public: 
 		int posicao[2];
-		void set_personagem(ModelMapp &M);// inicializa  personagem no mapa
+		void set_personagem(ModelMapp &M, int xini, int yini);// inicializa  personagem no mapa
 };
 
-void ModelPersonagem::set_personagem(ModelMapp &M){
-	
-	int xini, yini;
-	std::cin>> xini;
-	std::cin>> yini;
+void ModelPersonagem::set_personagem(ModelMapp &M, int xini, int yini){
 	
 	if(xini>MAX_I-1)
-    xini = 15;
+    xini = MAX_I-1;
   
   if(yini>MAX_J-1)
-    yini = 15;        
+    yini = MAX_J-1;        
 	
 	
 	M.terreno[xini][yini] = 0;
 	posicao[0] = xini;
 	posicao[1] = yini;
 }
+
 
 class ControllerPersonagem{
 	
@@ -71,23 +83,27 @@ class ControllerPersonagem{
 void ControllerPersonagem::move(ModelMapp &M, ModelPersonagem &P, int x, int y){
 	
 	
+	if(M.terreno[P.posicao[0]+x] != -1 &&M.terreno[P.posicao[1]+y]){
+		M.terreno[P.posicao[0]][P.posicao[1]] = 1; //Desocupa posicao antiga
 	
-	M.terreno[P.posicao[0]][P.posicao[1]] = 1; //Desocupa posicao antiga
+		P.posicao[0] = P.posicao[0] +x;
+		P.posicao[1] = P.posicao[1] +y;
 	
-	P.posicao[0] = P.posicao[0] +x;
-	P.posicao[1] = P.posicao[1] +y;
-	
-	if(P.posicao[0] >MAX_I -1)
-                P.posicao[0]  = MAX_I -1;
-        else if(P.posicao[0] < 0)
-        	P.posicao[0] = 0;
+		if(P.posicao[0] >MAX_I -1)
+                	P.posicao[0]  = MAX_I -1;
+                
+        	else if(P.posicao[0] < 0)
+        		P.posicao[0] = 0;
         	
-        if(P.posicao[1]>MAX_J -1)
-        	P.posicao[1] = MAX_J -1;        
-	else if(P.posicao[1]<0)
-		P.posicao[1] =0;
+        	if(P.posicao[1]>MAX_J -1)
+        		P.posicao[1] = MAX_J -1;    
+        	    
+		else if(P.posicao[1]<0)
+			P.posicao[1] =0;
 	
-	M.terreno[P.posicao[0]][P.posicao[1]] = 0; // Ocupa a nova posicao
+		M.terreno[P.posicao[0]][P.posicao[1]] = 0; // Ocupa a nova posicao
+	
+	}
 	
 }
 
@@ -136,15 +152,19 @@ ViewerPersonagem::ViewerPersonagem(ModelMapp &M, ModelPersonagem &P, ControllerP
 
   // Carregando texturas
   // personagem
-  SDL_Texture *personagem = IMG_LoadTexture(renderer, "~/Documentos/EA872/Tarefas_EA872/bomberman/bomberman.png");
+ // SDL_Texture *personagem = IMG_LoadTexture(renderer, "/Documentos/EA872/Tarefas_EA872/bomberman/bomberman.png");
   // fundo
-  SDL_Texture *tabuleiro = IMG_LoadTexture(renderer, "~/Documentos/EA872/Tarefas_EA872/bomberman/tabuleiro.png");
+  //SDL_Texture *tabuleiro = IMG_LoadTexture(renderer, "/Documentos/EA872/Tarefas_EA872/bomberman/tabuleiro.png");
+  
+  SDL_Texture *personagem = IMG_LoadTexture(renderer, "./bomberman.png");
+  // fundo
+  SDL_Texture *tabuleiro = IMG_LoadTexture(renderer, "./tabuleiro.png");
 
 
   // Quadrado onde a textura sera desenhada
   SDL_Rect target;
   target.x = P.posicao[0]*SECOES_X;
-  target.y = P.posicao[0]*SECOES_Y;
+  target.y = P.posicao[1]*SECOES_Y;
   SDL_QueryTexture(personagem, nullptr, nullptr, &target.w, &target.h);
 
   // Controlador:
@@ -171,15 +191,15 @@ ViewerPersonagem::ViewerPersonagem(ModelMapp &M, ModelPersonagem &P, ControllerP
     	}
     if (state[SDL_SCANCODE_RIGHT]){
      	C.move(M,P,1,0); 
-     	target.x = (P.posicao[0]+1)*SECOES_X;
+     	target.x = (P.posicao[0])*SECOES_X;
      	}
     if (state[SDL_SCANCODE_UP]){ 
-    	C.move(M,P,0,1); 
-    	target.y = (P.posicao[0]+1)*SECOES_Y;
+    	C.move(M,P,0,-1); 
+    	target.y = (P.posicao[1])*SECOES_Y;
     	}
     if (state[SDL_SCANCODE_DOWN]){
-    	C.move(M,P,0,-1);  
-    	target.y = (P.posicao[0]-1)*SECOES_Y;;
+    	C.move(M,P,0,1);  
+    	target.y = (P.posicao[1])*SECOES_Y;
 	}
     while (SDL_PollEvent(&evento)) {
       if (evento.type == SDL_QUIT) {
@@ -217,8 +237,9 @@ int main() {
 	ModelPersonagem P1;
 	ControllerPersonagem C1;
 	M.mapp_terrain();
+	M.forbbid_terrain();
 	
-	P1.set_personagem(M);
+	P1.set_personagem(M,5,6);
 	bool rodando = true;
 	
 	ViewerPersonagem V1(M,P1,C1,rodando);
